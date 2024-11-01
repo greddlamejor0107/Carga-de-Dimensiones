@@ -18,7 +18,6 @@ namespace LoadDWVentas.WorkerService
             _configuration = configuration;
             _scopeFactory = scopeFactory;
         }
-
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             while (!stoppingToken.IsCancellationRequested)
@@ -27,7 +26,6 @@ namespace LoadDWVentas.WorkerService
                 {
                     _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
 
-
                     using (var scope = _scopeFactory.CreateScope())
                     {
                         var dataService = scope.ServiceProvider.GetRequiredService<IDataServiceDwVentas>();
@@ -35,9 +33,9 @@ namespace LoadDWVentas.WorkerService
                         var result = await dataService.LoadDHW();
 
                     }
-
                 }
-                await Task.Delay(1000, stoppingToken);
+
+                await Task.Delay(_configuration.GetValue<int>("timerTime"), stoppingToken);
             }
         }
     }

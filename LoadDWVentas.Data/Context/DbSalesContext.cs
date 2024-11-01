@@ -15,6 +15,7 @@ namespace LoadDWVentas.Data.Context
         #region "Db Sets"
         public DbSet<DimEmployee> DimEmployees { get; set; }
         public DbSet<DimProductCategory> DimProductCategories { get; set; }
+        public DbSet<DimCustomer> DimCustomers { get; set; }
         #endregion
     }
 }

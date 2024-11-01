@@ -27,12 +27,13 @@ namespace LoadDWVentas.Data.Services
             {
                 await LoadDimEmployee();
                 await LoadDimProductCategory();
+                await LoadDimCustomers();
             }
             catch (Exception ex)
             {
 
                 result.Success = false;
-                result.Message = $"Error cargando el DWH Ventas. { ex.Message }";
+                result.Message = $"Error cargando el DWH Ventas. {ex.Message}";
             }
 
             return result;
@@ -52,7 +53,10 @@ namespace LoadDWVentas.Data.Services
                 }).ToList();
 
 
+
+
                 // Carga la dimension de empleados.
+                _salesContext.DimEmployees.RemoveRange(employees);
                 await _salesContext.DimEmployees.AddRangeAsync(employees);
 
                 await _salesContext.SaveChangesAsync();
@@ -86,8 +90,9 @@ namespace LoadDWVentas.Data.Services
                                              ProductId = product.ProductId
                                          }).AsNoTracking().ToList();
 
-                
+
                 // Carga la dimension de Products Categories.
+                _salesContext.DimProductCategories.RemoveRange(productCategories);
                 await _salesContext.DimProductCategories.AddRangeAsync(productCategories);
                 await _salesContext.SaveChangesAsync();
 
@@ -99,6 +104,40 @@ namespace LoadDWVentas.Data.Services
                 result.Message = $"Error cargando la dimension de producto y categoria. {ex.Message}";
             }
             return result;
+        }
+
+        private async Task<OperactionResult> LoadDimCustomers()
+        {
+            OperactionResult operaction = new OperactionResult() { Success = false };
+
+
+            try
+            {
+                // Obtener clientes de norwind
+
+
+
+
+                var customers = await _norwindContext.Customers.Select(cust => new DimCustomer()
+                {
+                    CustomerId = cust.CustomerId,
+                    CustomerName = cust.CompanyName
+
+                }).AsNoTracking()
+                  .ToListAsync();
+
+                // Carga dimension de cliente.
+                _salesContext.DimCustomers.RemoveRange(customers);
+                await _salesContext.DimCustomers.AddRangeAsync(customers);
+                await _salesContext.SaveChangesAsync();
+
+            }
+            catch (Exception ex)
+            {
+                operaction.Success = false;
+                operaction.Message = $"Error: {ex.Message} cargando la dimension de clientes.";
+            }
+            return operaction;
         }
     }
 }
