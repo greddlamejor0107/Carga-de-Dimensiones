@@ -4,6 +4,7 @@ using LoadDWVentas.Data.Context;
 using LoadDWVentas.Data.Entities.DwVentas;
 using LoadDWVentas.Data.Interfaces;
 using LoadDWVentas.Data.Result;
+using Microsoft.EntityFrameworkCore;
 
 namespace LoadDWVentas.Data.Services
 {
@@ -18,14 +19,33 @@ namespace LoadDWVentas.Data.Services
             _norwindContext = norwindContext;
             _salesContext = salesContext;
         }
-        public async Task<OperactionResult> LoadDimEmployee()
+
+        public async Task<OperactionResult> LoadDHW()
+        {
+            OperactionResult result = new OperactionResult();
+            try
+            {
+                await LoadDimEmployee();
+                await LoadDimProductCategory();
+            }
+            catch (Exception ex)
+            {
+
+                result.Success = false;
+                result.Message = $"Error cargando el DWH Ventas. { ex.Message }";
+            }
+
+            return result;
+        }
+
+        private async Task<OperactionResult> LoadDimEmployee()
         {
             OperactionResult result = new OperactionResult();
 
             try
             {
                 //Obtener los empleados de la base de datos de norwind.
-                var employees = _norwindContext.Employees.Select(emp => new DimEmployee()
+                var employees = _norwindContext.Employees.AsNoTracking().Select(emp => new DimEmployee()
                 {
                     EmployeeId = emp.EmployeeId,
                     EmployeeName = string.Concat(emp.FirstName, " ", emp.LastName)
@@ -49,7 +69,7 @@ namespace LoadDWVentas.Data.Services
             return result;
         }
 
-        public async Task<OperactionResult> LoadDimProductCategory()
+        private async Task<OperactionResult> LoadDimProductCategory()
         {
             OperactionResult result = new OperactionResult();
             try
@@ -58,14 +78,13 @@ namespace LoadDWVentas.Data.Services
 
                 var productCategories = (from product in _norwindContext.Products
                                          join category in _norwindContext.Categories on product.CategoryId equals category.CategoryId
-                                         where product.CategoryId < 0
                                          select new DimProductCategory()
                                          {
                                              CategoryId = category.CategoryId,
                                              ProductName = product.ProductName,
                                              CategoryName = category.CategoryName,
                                              ProductId = product.ProductId
-                                         }).ToList();
+                                         }).AsNoTracking().ToList();
 
                 
                 // Carga la dimension de Products Categories.
