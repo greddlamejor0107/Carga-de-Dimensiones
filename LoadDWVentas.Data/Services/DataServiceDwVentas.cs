@@ -56,7 +56,7 @@ namespace LoadDWVentas.Data.Services
 
 
                 // Carga la dimension de empleados.
-                _salesContext.DimEmployees.RemoveRange(employees);
+               
                 await _salesContext.DimEmployees.AddRangeAsync(employees);
 
                 await _salesContext.SaveChangesAsync();
@@ -92,7 +92,7 @@ namespace LoadDWVentas.Data.Services
 
 
                 // Carga la dimension de Products Categories.
-                _salesContext.DimProductCategories.RemoveRange(productCategories);
+               
                 await _salesContext.DimProductCategories.AddRangeAsync(productCategories);
                 await _salesContext.SaveChangesAsync();
 
@@ -127,7 +127,7 @@ namespace LoadDWVentas.Data.Services
                   .ToListAsync();
 
                 // Carga dimension de cliente.
-                _salesContext.DimCustomers.RemoveRange(customers);
+              
                 await _salesContext.DimCustomers.AddRangeAsync(customers);
                 await _salesContext.SaveChangesAsync();
 

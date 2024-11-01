@@ -14,9 +14,11 @@ internal class Program
         Host.CreateDefaultBuilder(args)
         .ConfigureServices((hostContext, services) => {
 
-            services.AddDbContextPool<NorwindContext>(options => options.UseSqlServer(hostContext.Configuration.GetConnectionString("DbNorwind")));
+            services.AddDbContextPool<NorwindContext>(options => 
+                                                      options.UseSqlServer(hostContext.Configuration.GetConnectionString("DbNorwind")));
 
-            services.AddDbContextPool<DbSalesContext>(options => options.UseSqlServer(hostContext.Configuration.GetConnectionString("DbSales")));
+            services.AddDbContextPool<DbSalesContext>(options => 
+                                                      options.UseSqlServer(hostContext.Configuration.GetConnectionString("DbSales")));
 
             services.AddScoped<IDataServiceDwVentas, DataServiceDwVentas>();
 

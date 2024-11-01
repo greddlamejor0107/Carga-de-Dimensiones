@@ -32,6 +32,11 @@ namespace LoadDWVentas.WorkerService
 
                         var result = await dataService.LoadDHW();
 
+                        if (!result.Success) 
+                        {
+                            //enviar la notificacion //
+                        }
+
                     }
                 }
 
