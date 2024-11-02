@@ -16,7 +16,7 @@ namespace LoadDWVentas.Data.Services
         public DataServiceDwVentas(NorwindContext norwindContext,
                                    DbSalesContext salesContext)
         {
-            _norwindContext = norwindContext;
+            _norwindContext = norwindContext; 
             _salesContext = salesContext;
         }
 
@@ -25,9 +25,10 @@ namespace LoadDWVentas.Data.Services
             OperactionResult result = new OperactionResult();
             try
             {
-                await LoadDimEmployee();
-                await LoadDimProductCategory();
-                await LoadDimCustomers();
+               // await LoadDimEmployee();
+               // await LoadDimProductCategory();
+               // await LoadDimCustomers();
+                await LoadDimShippers();
             }
             catch (Exception ex)
             {
@@ -46,17 +47,17 @@ namespace LoadDWVentas.Data.Services
             try
             {
                 //Obtener los empleados de la base de datos de norwind.
-                var employees = _norwindContext.Employees.AsNoTracking().Select(emp => new DimEmployee()
+                var employees = await _norwindContext.Employees.AsNoTracking().Select(emp => new DimEmployee()
                 {
                     EmployeeId = emp.EmployeeId,
                     EmployeeName = string.Concat(emp.FirstName, " ", emp.LastName)
-                }).ToList();
+                }).ToListAsync();
 
 
 
 
                 // Carga la dimension de empleados.
-               
+
                 await _salesContext.DimEmployees.AddRangeAsync(employees);
 
                 await _salesContext.SaveChangesAsync();
@@ -80,19 +81,19 @@ namespace LoadDWVentas.Data.Services
             {
                 // Obtener las products categories de norwind //
 
-                var productCategories = (from product in _norwindContext.Products
-                                         join category in _norwindContext.Categories on product.CategoryId equals category.CategoryId
-                                         select new DimProductCategory()
-                                         {
-                                             CategoryId = category.CategoryId,
-                                             ProductName = product.ProductName,
-                                             CategoryName = category.CategoryName,
-                                             ProductId = product.ProductId
-                                         }).AsNoTracking().ToList();
+                var productCategories = await (from product in _norwindContext.Products
+                                               join category in _norwindContext.Categories on product.CategoryId equals category.CategoryId
+                                               select new DimProductCategory()
+                                               {
+                                                   CategoryId = category.CategoryId,
+                                                   ProductName = product.ProductName,
+                                                   CategoryName = category.CategoryName,
+                                                   ProductId = product.ProductId
+                                               }).AsNoTracking().ToListAsync();
 
 
                 // Carga la dimension de Products Categories.
-               
+
                 await _salesContext.DimProductCategories.AddRangeAsync(productCategories);
                 await _salesContext.SaveChangesAsync();
 
@@ -115,9 +116,6 @@ namespace LoadDWVentas.Data.Services
             {
                 // Obtener clientes de norwind
 
-
-
-
                 var customers = await _norwindContext.Customers.Select(cust => new DimCustomer()
                 {
                     CustomerId = cust.CustomerId,
@@ -127,7 +125,7 @@ namespace LoadDWVentas.Data.Services
                   .ToListAsync();
 
                 // Carga dimension de cliente.
-              
+
                 await _salesContext.DimCustomers.AddRangeAsync(customers);
                 await _salesContext.SaveChangesAsync();
 
@@ -138,6 +136,31 @@ namespace LoadDWVentas.Data.Services
                 operaction.Message = $"Error: {ex.Message} cargando la dimension de clientes.";
             }
             return operaction;
+        }
+
+        private async Task<OperactionResult> LoadDimShippers()
+        {
+            OperactionResult result = new OperactionResult();
+
+            try
+            {
+                var shippers = await _norwindContext.Shippers.Select(ship => new DimShipper()
+                {
+                    ShipperId = ship.ShipperID,
+                    ShipperName = ship.CompanyName
+                }).ToListAsync();
+
+
+                await _salesContext.DimShippers.AddRangeAsync(shippers);
+                await _salesContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+
+                result.Success = false;
+                result.Message = $"Error cargando la dimension de shippers { ex.Message } ";
+            }
+            return result;
         }
     }
 }

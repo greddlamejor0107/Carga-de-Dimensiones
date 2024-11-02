@@ -19,6 +19,7 @@ internal class Program
 
             services.AddDbContextPool<DbSalesContext>(options => 
                                                       options.UseSqlServer(hostContext.Configuration.GetConnectionString("DbSales")));
+ 
 
             services.AddScoped<IDataServiceDwVentas, DataServiceDwVentas>();
 
