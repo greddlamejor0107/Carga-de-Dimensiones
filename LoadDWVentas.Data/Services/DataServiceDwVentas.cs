@@ -5,6 +5,7 @@ using LoadDWVentas.Data.Entities.DwVentas;
 using LoadDWVentas.Data.Interfaces;
 using LoadDWVentas.Data.Result;
 using Microsoft.EntityFrameworkCore;
+using System.Runtime.CompilerServices;
 
 namespace LoadDWVentas.Data.Services
 {
@@ -25,10 +26,12 @@ namespace LoadDWVentas.Data.Services
             OperactionResult result = new OperactionResult();
             try
             {
-               // await LoadDimEmployee();
-               // await LoadDimProductCategory();
-               // await LoadDimCustomers();
-                await LoadDimShippers();
+                // await LoadDimEmployee();
+                // await LoadDimProductCategory();
+                // await LoadDimCustomers();
+                // await LoadDimShippers();
+
+                await LoadFactSales();
             }
             catch (Exception ex)
             {
@@ -160,6 +163,24 @@ namespace LoadDWVentas.Data.Services
                 result.Success = false;
                 result.Message = $"Error cargando la dimension de shippers { ex.Message } ";
             }
+            return result;
+        }
+
+        private async Task<OperactionResult> LoadFactSales() 
+        {
+            OperactionResult result = new OperactionResult();
+
+            try
+            {
+                var ventas = await _norwindContext.Vwventas.AsNoTracking().ToListAsync();
+            }
+            catch (Exception ex)
+            {
+
+                result.Success = false;
+                result.Message = $"Error cargando el fact de ventas {ex.Message} ";
+            }
+
             return result;
         }
     }
