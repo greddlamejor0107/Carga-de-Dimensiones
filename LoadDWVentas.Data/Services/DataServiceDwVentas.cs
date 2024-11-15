@@ -30,8 +30,8 @@ namespace LoadDWVentas.Data.Services
                 // await LoadDimProductCategory();
                 // await LoadDimCustomers();
                 // await LoadDimShippers();
-
-                await LoadFactSales();
+                //await LoadFactSales();
+                await LoadFactCustomerServed();
             }
             catch (Exception ex)
             {
@@ -181,6 +181,24 @@ namespace LoadDWVentas.Data.Services
                 result.Message = $"Error cargando el fact de ventas {ex.Message} ";
             }
 
+            return result;
+        }
+
+
+        private async Task<OperactionResult> LoadFactCustomerServed()
+        {
+            OperactionResult result = new OperactionResult() { Success = true };
+
+            try
+            {
+                var customerServed = await _norwindContext.VwServedCustomers.AsNoTracking().ToListAsync();
+            }
+            catch (Exception ex)
+            {
+
+                result.Success = false;
+                result.Message = $"Error cargando el fact de clientes atendidos {ex.Message} ";
+            }
             return result;
         }
     }

@@ -10,10 +10,14 @@
    "PreserveCasingWithRegex": true,
    "ProjectRootNamespace": "LoadDWVentas.Models",
    "Schemas": null,
-   "SelectedHandlebarsLanguage": 2,
+   "SelectedHandlebarsLanguage": 3,
    "SelectedToBeGenerated": 0,
    "T4TemplatePath": null,
    "Tables": [
+      {
+         "Name": "[DWH].[VW_ServedCustomers]",
+         "ObjectType": 3
+      },
       {
          "Name": "[DWH].[VWVentas]",
          "ObjectType": 3

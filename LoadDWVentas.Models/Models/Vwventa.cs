@@ -19,6 +19,12 @@ public partial class Vwventa
 
     public string CompanyName { get; set; }
 
+    public string City { get; set; }
+
+    public int ProductId { get; set; }
+
+    public string ProductName { get; set; }
+
     public int? DateKey { get; set; }
 
     public int? Año { get; set; }

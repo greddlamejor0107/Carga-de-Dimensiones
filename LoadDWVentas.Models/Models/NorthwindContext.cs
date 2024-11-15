@@ -13,16 +13,31 @@ public partial class NorthwindContext : DbContext
     {
     }
 
+    public virtual DbSet<VwServedCustomer> VwServedCustomers { get; set; }
+
     public virtual DbSet<Vwventa> Vwventas { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<VwServedCustomer>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("VW_ServedCustomers", "DWH");
+
+            entity.Property(e => e.EmployeeId).HasColumnName("EmployeeID");
+            entity.Property(e => e.EmployeeName)
+                .IsRequired()
+                .HasMaxLength(31);
+        });
+
         modelBuilder.Entity<Vwventa>(entity =>
         {
             entity
                 .HasNoKey()
                 .ToView("VWVentas", "DWH");
 
+            entity.Property(e => e.City).HasMaxLength(15);
             entity.Property(e => e.CompanyName)
                 .IsRequired()
                 .HasMaxLength(40);
@@ -38,6 +53,9 @@ public partial class NorthwindContext : DbContext
             entity.Property(e => e.EmployeeName)
                 .IsRequired()
                 .HasMaxLength(31);
+            entity.Property(e => e.ProductName)
+                .IsRequired()
+                .HasMaxLength(40);
             entity.Property(e => e.ShipperId).HasColumnName("ShipperID");
         });
 
