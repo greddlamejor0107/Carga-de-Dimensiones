@@ -1,26 +1,22 @@
 ﻿{
    "CodeGenerationMode": 4,
-   "ContextClassName": "NorthwindContext",
+   "ContextClassName": "DwVentasContext",
    "ContextNamespace": null,
    "FilterSchemas": false,
    "IncludeConnectionString": false,
    "ModelNamespace": null,
    "OutputContextPath": null,
-   "OutputPath": "Models",
+   "OutputPath": "ModelsVentas",
    "PreserveCasingWithRegex": true,
-   "ProjectRootNamespace": "LoadDWVentas.Models",
+   "ProjectRootNamespace": "LoadDWVentas.Models.DwVentas",
    "Schemas": null,
    "SelectedHandlebarsLanguage": 3,
    "SelectedToBeGenerated": 0,
    "T4TemplatePath": null,
    "Tables": [
       {
-         "Name": "[DWH].[VW_ServedCustomers]",
-         "ObjectType": 3
-      },
-      {
-         "Name": "[DWH].[VWVentas]",
-         "ObjectType": 3
+         "Name": "[dbo].[CustOrderHist]",
+         "ObjectType": 1
       }
    ],
    "UiHint": null,

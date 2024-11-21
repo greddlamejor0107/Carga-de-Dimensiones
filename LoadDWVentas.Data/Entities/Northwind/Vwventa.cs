@@ -15,8 +15,8 @@ namespace LoadDWVentas.Data.Entities.Northwind
 
         public int ShipperId { get; set; }
 
-        public string? CompanyName { get; set; }
-        public string? City { get; set; }
+        public string? Shipper { get; set; }
+        public string? Country { get; set; }
 
         public int ProductId { get; set; }
 

@@ -17,6 +17,8 @@ namespace LoadDWVentas.Data.Context
         public DbSet<DimProductCategory> DimProductCategories { get; set; }
         public DbSet<DimCustomer> DimCustomers { get; set; }
         public DbSet<DimShipper> DimShippers { get; set; }
+        public DbSet<FactOrder> FactOrders { get; set; }
+        public DbSet<FactClienteAtendido> FactClienteAtendidos { get; set; }
         #endregion
     }
 }

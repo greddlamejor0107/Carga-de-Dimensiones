@@ -5,6 +5,7 @@ using LoadDWVentas.Data.Entities.DwVentas;
 using LoadDWVentas.Data.Interfaces;
 using LoadDWVentas.Data.Result;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace LoadDWVentas.Data.Services
@@ -17,7 +18,7 @@ namespace LoadDWVentas.Data.Services
         public DataServiceDwVentas(NorwindContext norwindContext,
                                    DbSalesContext salesContext)
         {
-            _norwindContext = norwindContext; 
+            _norwindContext = norwindContext;
             _salesContext = salesContext;
         }
 
@@ -26,12 +27,14 @@ namespace LoadDWVentas.Data.Services
             OperactionResult result = new OperactionResult();
             try
             {
-                // await LoadDimEmployee();
-                // await LoadDimProductCategory();
-                // await LoadDimCustomers();
-                // await LoadDimShippers();
-                //await LoadFactSales();
+
+                await LoadDimEmployee();
+                await LoadDimProductCategory();
+                await LoadDimCustomers();
+                await LoadFactSales();
                 await LoadFactCustomerServed();
+
+
             }
             catch (Exception ex)
             {
@@ -56,10 +59,12 @@ namespace LoadDWVentas.Data.Services
                     EmployeeName = string.Concat(emp.FirstName, " ", emp.LastName)
                 }).ToListAsync();
 
-
-
+                int[] employeeIds = employees.Select(emp => emp.EmployeeId).ToArray();
 
                 // Carga la dimension de empleados.
+                await _salesContext.DimEmployees.Where(cd => employeeIds.Contains(cd.EmployeeId))
+                                                .AsNoTracking()
+                                                .ExecuteDeleteAsync();
 
                 await _salesContext.DimEmployees.AddRangeAsync(employees);
 
@@ -97,7 +102,15 @@ namespace LoadDWVentas.Data.Services
 
                 // Carga la dimension de Products Categories.
 
+                int[] productsIds = productCategories.Select(c => c.ProductId).ToArray();
+
+
+                await _salesContext.DimProductCategories.Where(c => productsIds.Contains(c.ProductId))
+                                                        .AsNoTracking()
+                                                        .ExecuteDeleteAsync();
+
                 await _salesContext.DimProductCategories.AddRangeAsync(productCategories);
+
                 await _salesContext.SaveChangesAsync();
 
 
@@ -129,6 +142,12 @@ namespace LoadDWVentas.Data.Services
 
                 // Carga dimension de cliente.
 
+                string[] customersIds = customers.Select(cust => cust.CustomerId).ToArray();
+
+                await _salesContext.DimCustomers.Where(cust => customersIds.Contains(cust.CustomerId))
+                                          .AsNoTracking()
+                                          .ExecuteDeleteAsync();
+
                 await _salesContext.DimCustomers.AddRangeAsync(customers);
                 await _salesContext.SaveChangesAsync();
 
@@ -141,38 +160,51 @@ namespace LoadDWVentas.Data.Services
             return operaction;
         }
 
-        private async Task<OperactionResult> LoadDimShippers()
-        {
-            OperactionResult result = new OperactionResult();
-
-            try
-            {
-                var shippers = await _norwindContext.Shippers.Select(ship => new DimShipper()
-                {
-                    ShipperId = ship.ShipperID,
-                    ShipperName = ship.CompanyName
-                }).ToListAsync();
-
-
-                await _salesContext.DimShippers.AddRangeAsync(shippers);
-                await _salesContext.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-
-                result.Success = false;
-                result.Message = $"Error cargando la dimension de shippers { ex.Message } ";
-            }
-            return result;
-        }
-
-        private async Task<OperactionResult> LoadFactSales() 
+        private async Task<OperactionResult> LoadFactSales()
         {
             OperactionResult result = new OperactionResult();
 
             try
             {
                 var ventas = await _norwindContext.Vwventas.AsNoTracking().ToListAsync();
+
+
+                int[] ordersId = await _salesContext.FactOrders.Select(cd => cd.OrderNumber).ToArrayAsync();
+
+                if (ordersId.Any())
+                {
+                    await _salesContext.FactOrders.Where(cd => ordersId.Contains(cd.OrderNumber))
+                                                  .AsNoTracking()
+                                                  .ExecuteDeleteAsync();
+                }
+
+                foreach (var venta in ventas)
+                {
+                    var customer = await _salesContext.DimCustomers.SingleOrDefaultAsync(cust => cust.CustomerId == venta.CustomerId);
+                    var employee = await _salesContext.DimEmployees.SingleOrDefaultAsync(emp => emp.EmployeeId == venta.EmployeeId);
+                    var shipper = await _salesContext.DimShippers.SingleOrDefaultAsync(ship => ship.ShipperId == venta.ShipperId);
+                    var product = await _salesContext.DimProductCategories.SingleOrDefaultAsync(pro => pro.ProductId == venta.ProductId);
+
+                    FactOrder factOrder = new FactOrder()
+                    {
+                        CantidadVentas = venta.Cantidad.Value,
+                        Country = venta.Country,
+                        CustomerKey = customer.CustomerKey,
+                        EmployeeKey = employee.EmployeeKey,
+                        DateKey = venta.DateKey.Value,
+                        ProductKey = product.ProductKey,
+                        Shipper = shipper.ShipperKey,
+                        TotalVentas = Convert.ToDecimal(venta.TotalVentas)
+                    };
+
+                    await _salesContext.FactOrders.AddAsync(factOrder);
+
+                    await _salesContext.SaveChangesAsync();
+                }
+
+
+
+                result.Success = true;
             }
             catch (Exception ex)
             {
@@ -184,14 +216,47 @@ namespace LoadDWVentas.Data.Services
             return result;
         }
 
-
         private async Task<OperactionResult> LoadFactCustomerServed()
         {
             OperactionResult result = new OperactionResult() { Success = true };
 
             try
             {
-                var customerServed = await _norwindContext.VwServedCustomers.AsNoTracking().ToListAsync();
+                var customerServeds = await _norwindContext.VwServedCustomers.AsNoTracking().ToListAsync();
+
+                int[] customerIds = _salesContext.FactClienteAtendidos.Select(cli => cli.ClienteAtendidoId).ToArray();
+
+                //Limpiamos la tabla de facts //
+
+                if (customerIds.Any())
+                {
+                    await _salesContext.FactClienteAtendidos.Where(fact => customerIds.Contains(fact.ClienteAtendidoId))
+                                                            .AsNoTracking()
+                                                            .ExecuteDeleteAsync();
+                }
+
+                //Carga el fact de clientes atendidos. //
+                foreach (var customer in customerServeds)
+                {
+                    var employee = await _salesContext.DimEmployees
+                                                      .SingleOrDefaultAsync(emp => emp.EmployeeId ==
+                                                                               customer.EmployeeId);
+
+                    
+                    FactClienteAtendido factClienteAtendido = new FactClienteAtendido()
+                    {
+                        EmployeeKey = employee.EmployeeKey,
+                        TotalClientes = customer.TotalCustomersServed
+                    };
+
+                   
+                    await _salesContext.FactClienteAtendidos.AddAsync(factClienteAtendido);
+
+                    await _salesContext.SaveChangesAsync();
+                }
+
+                result.Success = true;
+
             }
             catch (Exception ex)
             {
