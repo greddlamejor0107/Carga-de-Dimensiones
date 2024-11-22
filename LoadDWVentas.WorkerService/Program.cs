@@ -1,8 +1,7 @@
 using LoadDWVentas.Data.Context;
-using LoadDWVentas.Data.Interfaces;
-using LoadDWVentas.Data.Services;
 using LoadDWVentas.WorkerService;
 using Microsoft.EntityFrameworkCore;
+using LoadDWVentas.Data.Interfaces;
 
 internal class Program
 {
@@ -15,14 +14,15 @@ internal class Program
         .ConfigureServices((hostContext, services) => {
 
             services.AddDbContextPool<NorwindContext>(options => 
-                                                      options.UseSqlServer(hostContext.Configuration.GetConnectionString("DbNorwind")));
+                                                      options.UseSqlServer(hostContext.Configuration.GetConnectionString("NorthwindContext")));
 
-            services.AddDbContextPool<DbSalesContext>(options => 
-                                                      options.UseSqlServer(hostContext.Configuration.GetConnectionString("DbSales")));
+            services.AddDbContextPool<NorthwindOrder>(options => 
+                                                      options.UseSqlServer(hostContext.Configuration.GetConnectionString("NorthwindOrders")));
  
 
-            services.AddScoped<IDataServiceDwVentas, DataServiceDwVentas>();
+           // services.AddScoped<IDataServiceDwVentas, DataServiceDwVentas>();
 
+            
             services.AddHostedService<Worker>();
         });
 }

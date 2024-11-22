@@ -19,34 +19,14 @@ namespace LoadDWVentas.Data.Context
        
 
         #region"Db Sets"
-        public DbSet<Category> Categories { get; set; }
-        public DbSet<Product> Products { get; set; }
-        public DbSet<Employee> Employees { get; set; }
-        public DbSet<Customer> Customers { get; set; }
-        public DbSet<Shipper> Shippers { get; set; }
-        public DbSet<Vwventa> Vwventas { get; set; }
-        public DbSet<VwServedCustomer> VwServedCustomers { get; set; }
+        public DbSet<Categories> Categories { get; set; }
+        public DbSet<Products> Products { get; set; }
+        public DbSet<Employees> Employees { get; set; }
+        public DbSet<Customers> Customers { get; set; }
+        public DbSet<Shippers> Shippers { get; set; }
+       
         #endregion
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<VwServedCustomer>(entity =>
-            {
-                entity
-                    .HasNoKey()
-                    .ToView("VW_ServedCustomers", "DWH");
-
-               
-            });
-
-            modelBuilder.Entity<Vwventa>(entity =>
-            {
-                entity
-                    .HasNoKey()
-                    .ToView("VWVentas", "DWH");
-
-             
-            });
-        }
+       
     }
 }

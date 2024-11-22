@@ -28,7 +28,7 @@ namespace LoadDWVentas.WorkerService
 
                     using (var scope = _scopeFactory.CreateScope())
                     {
-                        var dataService = scope.ServiceProvider.GetRequiredService<IDataServiceDwVentas>();
+                        var dataService = scope.ServiceProvider.GetRequiredService<IDataServiceDwOrders>();
 
                         var result = await dataService.LoadDHW();
 
